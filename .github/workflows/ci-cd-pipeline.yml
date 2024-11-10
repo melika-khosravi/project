@@ -1,0 +1,30 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Build Docker Image
+        run: docker build -t flask-app:latest .
+
+      - name: Run Container and Test
+        run: |
+          docker run -d --name flask-app -p 5000:5000 flask-app:latest
+          sleep 5
+          curl -f http://localhost:5000 || (echo "App did not start correctly" && exit 1)
+
+      - name: Cleanup
+        run: |
+          docker stop flask-app
+          docker rm flask-app
+
+
